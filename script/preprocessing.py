@@ -55,6 +55,26 @@ if __name__ == "__main__":
     # Read in the input dataset
     df_train = pd.read_csv('../data/train.csv')
     df_test = pd.read_csv('../data/test.csv')
-
+    df_test["trip_duration"] = -1
     print('Read {} training data and {} testing data, preprocessing ...'.format(df_train.shape, df_test.shape))
+
+    # preprocess data
+    print('Starting preprocess data ...')
+    df_full = pd.concat([df_train, df_test], axis=0)
+    df_preprocessed = preprocess_data(df_full)
+
+    # split to new_train and new_test
+    train_len = len(df_train)
+    new_train = df_preprocessed.iloc[:train_len, :]
+    new_test = df_preprocessed.iloc[train_len:, :]
     
+    # dropping columns for both train and test
+    new_train.drop(["id","pickup_datetime","dropoff_datetime","day"], axis=1, inplace=True)
+    new_test.drop(["pickup_datetime","dropoff_datetime","day","trip_duration"], axis=1, inplace=True)
+
+    # saving df train and test to csv
+    new_train.to_csv("../input/train_preprocessed.csv", index=False)
+    print("Train data saved!")
+    new_test.to_csv("../input/test_preprocessed.csv", index=False)
+    print("Test data saved!") 
+
