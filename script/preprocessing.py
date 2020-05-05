@@ -6,7 +6,7 @@ import multiprocess
 N_THREADS = 8
 
 def haversine_distance(x):
-    a_lat, a_lon, b_lat, b_lon = x_test
+    a_lat, a_lon, b_lat, b_lon = x
     return haversine.haversine((a_lat, a_lon), (b_lat, b_lon))
 
 def apply_multithreaded(data, func):
@@ -41,11 +41,11 @@ def preprocess_data(df):
     df['hourly_count'] = df['hour'].apply(lambda hour: hourly_traffic[hour])
 
     # creating time estimate features
-    df['haversine_speed_km/s'] = df['dist_haversine'] / (df['trip_duration'] / 3600)  # Calculate haversine speed for training set
+    df['haversine_speed'] = df['dist_haversine'] / (df['trip_duration'] / 3600)  # Calculate haversine speed for training set
     hourly_speed = df.groupby('hour')['haversine_speed'].mean()  # Find average haversine_speed for each hour in the training set
     hourly_speed_fill = df['haversine_speed'].mean()  # Get mean across whole dataset for filling unknowns
     df_hourly_speed = df['hour'].apply(lambda hour: hourly_speed[hour] if hour in hourly_speed else hourly_speed_fill)
-    df['haversine_speed_estim_km/h'] = df['dist_haversine'] / df_hourly_speed
+    df['haversine_speed_estim'] = df['dist_haversine'] / df_hourly_speed
 
     return df
 
@@ -53,13 +53,13 @@ if __name__ == "__main__":
     print('Reading data into memory ...')
 
     # Read in the input dataset
-    df_train = pd.read_csv('../data/train.csv')
-    df_test = pd.read_csv('../data/test.csv')
+    df_train = pd.read_csv('../input/train.csv')
+    df_test = pd.read_csv('../input/test.csv')
     df_test["trip_duration"] = -1
-    print('Read {} training data and {} testing data, preprocessing ...'.format(df_train.shape, df_test.shape))
+    print('Read {} training data and {} testing data ...'.format(df_train.shape, df_test.shape))
 
     # preprocess data
-    print('Starting preprocess data ...')
+    print('Start preprocessing data ...')
     df_full = pd.concat([df_train, df_test], axis=0)
     df_preprocessed = preprocess_data(df_full)
 
