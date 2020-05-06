@@ -27,24 +27,24 @@ if __name__ == "__main__":
     df["kfold"] = -1
     cv = CrossValidation(df,
                          shuffle=True,
-                         target_cols=["TARGET"],
-                         problem_type="binary_classification")
+                         target_cols=["trip_duration"],
+                         problem_type="single_col_regression")
     df_split = cv.split()
 
     train_df = df_split[df_split.kfold.isin(FOLD_MAPPING.get(FOLD))].reset_index(drop=True)
     valid_df = df_split[df_split.kfold==FOLD].reset_index(drop=True)
-    ytrain = train_df.TARGET.values
-    yvalid = valid_df.TARGET.values
-    train_df = train_df.drop(["TARGET", "kfold"], axis=1)
-    valid_df = valid_df.drop(["TARGET", "kfold"], axis=1)
+    ytrain = train_df["trip_duration"].values
+    yvalid = valid_df["trip_duration"].values
+    train_df = train_df.drop(["trip_duration", "kfold"], axis=1)
+    valid_df = valid_df.drop(["trip_duration", "kfold"], axis=1)
     valid_df = valid_df[train_df.columns]
 
     # data is ready to train
-    clf = dispatcher.MODELS[MODEL]
-    clf.fit(train_df, ytrain, eval_set=[(train_df, ytrain), (valid_df, yvalid)], eval_metric="auc")
-    preds = clf.predict_proba(valid_df)[:, 1]
-    print(f"ROC-AUC score for {MODEL}_{FOLD} is: ", metrics.roc_auc_score(yvalid, preds))
-    print(f"LogLoss score for {MODEL}_{FOLD} is: ", metrics.log_loss(yvalid, preds))
+    reg = dispatcher.MODELS[MODEL]
+    reg.fit(train_df, ytrain, eval_set=[(train_df, ytrain), (valid_df, yvalid)], eval_metric="rmse")
+    preds = reg.predict(valid_df)
+    print(f"RMSE for {MODEL}_{FOLD} is: ", metrics.mean_squared_error(yvalid, preds))
+    #print(f"LogLoss score for {MODEL}_{FOLD} is: ", metrics.log_loss(yvalid, preds))
 
     joblib.dump(clf, f"models/{MODEL}_{FOLD}.pkl")
     joblib.dump(train_df.columns, f"models/{MODEL}_{FOLD}_columns.pkl")
