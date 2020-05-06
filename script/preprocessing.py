@@ -41,7 +41,8 @@ def preprocess_data(df):
     df['hourly_count'] = df['hour'].apply(lambda hour: hourly_traffic[hour])
 
     # creating time estimate features
-    df['haversine_speed'] = df['dist_haversine'] / (df['trip_duration'] / 3600)  # Calculate haversine speed for training set
+    df['haversine_speed'] = df['dist_haversine'] / df['trip_duration']  # Calculate haversine speed for training set
+    df['haversine_speed_km/h'] = df['dist_haversine'] / (df['trip_duration'] / 3600) 
     hourly_speed = df.groupby('hour')['haversine_speed'].mean()  # Find average haversine_speed for each hour in the training set
     hourly_speed_fill = df['haversine_speed'].mean()  # Get mean across whole dataset for filling unknowns
     df_hourly_speed = df['hour'].apply(lambda hour: hourly_speed[hour] if hour in hourly_speed else hourly_speed_fill)
