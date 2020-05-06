@@ -46,6 +46,6 @@ if __name__ == "__main__":
     print(f"RMSE for {MODEL}_{FOLD} is: ", metrics.mean_squared_error(yvalid, preds))
     #print(f"LogLoss score for {MODEL}_{FOLD} is: ", metrics.log_loss(yvalid, preds))
 
-    joblib.dump(clf, f"models/{MODEL}_{FOLD}.pkl")
+    joblib.dump(reg, f"models/{MODEL}_{FOLD}.pkl")
     joblib.dump(train_df.columns, f"models/{MODEL}_{FOLD}_columns.pkl")
     print(f"{MODEL}_{FOLD} model is saved!")
