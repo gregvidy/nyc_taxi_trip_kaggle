@@ -1,12 +1,13 @@
 import xgboost as xgb
 
 MODELS = {
-    "xgboost": xgb.XGBRegressor(n_estimators=100,
+    "xgboost": xgb.XGBRegressor(n_estimators=1500,
                                 n_jobs=-1,
                                 verbose=2,
+                                max_depth=12,
+                                subsample=0.99,
+                                min_child_weight=0.5,
                                 booster='gbtree',
-                                reg_lambda=2,
-                                reg_alpha=2,
                                 objective='reg:squarederror',
                                 random_state=123)
 }
