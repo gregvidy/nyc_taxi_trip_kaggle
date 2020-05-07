@@ -18,7 +18,7 @@ def predict():
     prediction = None
 
     for FOLD in range(5):
-        print(FOLD)
+        print(f"Predicting for fold number {FOLD}")
         df = pd.read_csv(TEST_DATA)
         cols = joblib.load(os.path.join("models", f"{MODEL}_{FOLD}_columns.pkl"))        
            
@@ -36,8 +36,7 @@ def predict():
     prediction /= 5
     
     sub = pd.DataFrame(np.column_stack((test_idx, prediction)),
-                                        columns=["ID", "PREDS"])
-    sub["id"] = sub["id"].astype(int)
+                                        columns=["id", "preds"])
     return sub
 
 if __name__ == "__main__":
@@ -45,4 +44,4 @@ if __name__ == "__main__":
     print("Start predicting ...")
     submission = predict()
     submission.to_csv(f"models/{MODEL}.csv", index=False)
-    print("Predictions saved!")
+    print("All predictions are combined and saved!")
