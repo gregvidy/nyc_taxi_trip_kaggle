@@ -1,9 +1,10 @@
 import os
 import pandas as pd
 from sklearn import ensemble
-from sklearn import metrics
 import joblib
 from .cross_validation import CrossValidation
+from .metrics import RegressionMetrics
+import math
 
 from . import dispatcher
 
@@ -28,7 +29,8 @@ if __name__ == "__main__":
     cv = CrossValidation(df,
                          shuffle=True,
                          target_cols=["trip_duration"],
-                         problem_type="single_col_regression")
+                         problem_type="single_col_regression",
+                         random_state=1337)
     df_split = cv.split()
 
     train_df = df_split[df_split.kfold.isin(FOLD_MAPPING.get(FOLD))].reset_index(drop=True)
@@ -43,8 +45,8 @@ if __name__ == "__main__":
     reg = dispatcher.MODELS[MODEL]
     reg.fit(train_df, ytrain, eval_set=[(train_df, ytrain), (valid_df, yvalid)], eval_metric="rmse")
     preds = reg.predict(valid_df)
-    print(f"RMSE for {MODEL}_{FOLD} is: ", metrics.mean_squared_error(yvalid, preds))
-    #print(f"LogLoss score for {MODEL}_{FOLD} is: ", metrics.log_loss(yvalid, preds))
+    print(f"RMSE for {MODEL}_{FOLD} is: ", math.sqrt(RegressionMetrics()("mse", yvalid, preds)))
+    print(f"RMSLE for {MODEL}_{FOLD} is: ", RegressionMetrics()("rmsle", yvalid, preds))
 
     joblib.dump(reg, f"models/{MODEL}_{FOLD}.pkl")
     joblib.dump(train_df.columns, f"models/{MODEL}_{FOLD}_columns.pkl")
