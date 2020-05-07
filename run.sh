@@ -8,4 +8,4 @@ FOLD=2 python -m script.train
 FOLD=3 python -m script.train
 FOLD=4 python -m script.train
 
-# python -m script.predict
+python -m script.predict
