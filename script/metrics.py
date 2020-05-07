@@ -1,4 +1,4 @@
-from numpy as np
+import numpy as np
 from sklearn import metrics as skmetrics
 import math
 
@@ -12,8 +12,7 @@ class ClassificationMetrics:
             "auc": self._auc,
             "logloss": self._logloss,
             "gini": self._gini,
-            "gini_normalized": self._gini_normalized,
-            "rmsle": self._rmsle
+            "gini_normalized": self._gini_normalized
         }
     
     def __call__(self, metric, y_true, y_pred, y_proba=None):
@@ -32,7 +31,6 @@ class ClassificationMetrics:
         else:
             return self.metrics[metric](y_true=y_true, y_pred=y_pred)
 
-    # classification problem
     @staticmethod
     def _auc(y_true, y_pred):
         return skmetrics.roc_auc_score(y_true=y_true, y_score=y_pred)
@@ -66,13 +64,29 @@ class ClassificationMetrics:
     def _recall(y_true, y_pred):
         return skmetrics.recall_score(y_true=y_true, y_pred=y_pred)
 
-    # regression problem
-    @staticmethod
-    def _rmse(y_true, y_pred):
-        return skmetrics.mean_squared_error(y_true=y_true, y_pred=y_pred))
+
+class RegressionMetrics:
+    def __init__(self):
+        self.metrics = {
+            "mse": self._mse,
+            "rmse": self._rmse,
+            "rmsle": self._rmsle
+        }
+
+    def __call__(self, metric, y_true, y_pred):
+        if metric not in self.metrics:
+            raise Exception("Metric is not supported!")
+        else:
+            return self.metrics[metric](y_true=y_true, y_pred=y_pred)
 
     @staticmethod
-    def _rmsle(y_true=y_true, y_pred=y_pred):
+    def _mse(y_true, y_pred):
+        return skmetrics.mean_squared_error(y_true=y_true, y_pred=y_pred)
+
+    def _rmse(y_true, y_pred):
+        return math.sqrt(skmetrics.mean_squared_error(y_true=y_true, y_pred=y_pred))
+
+    @staticmethod
+    def _rmsle(y_true, y_pred) : 
         assert len(y_true) == len(y_pred)
-        terms_to_sum = [(math.log(y_pred[i] + 1) - math.log(y_true[i] + 1)) ** 2.0 for i, pred in enumerate(y_pred)]
-        return (sum(terms_to_sum) * (1.0/len(y_true))) ** 0.5
+        return np.sqrt(np.mean((np.log(1+np.array(y_pred)) - np.log(1+np.array(y_true)))**2))
